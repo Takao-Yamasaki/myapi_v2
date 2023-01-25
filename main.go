@@ -2,36 +2,45 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"log"
+	"net/http"
 )
 
-// 構造体
-type Person struct {
-	height int
-	weight int
-	name   string
-}
-
-// メソッド
-func (p *Person) Greeting() {
-	fmt.Printf("Hello, my name is %s\n", p.name)
-}
-
-// ポインタを使わずPersonを受け取る
-func (p Person) addHeight() {
-	p.height += 10
-}
-
-// ポインタを使ってPersonを受け取る
-func (p *Person) addWeight() {
-	p.weight += 10
-}
-
 func main() {
-	q := Person{height: 160, weight: 50}
-	fmt.Println(q) // {160 50 }
+	helloHandler := func(w http.ResponseWriter, req *http.Request) {
+		io.WriteString(w, "Hello, world!\n")
+	}
 
-	q.addHeight()
-	q.addWeight()
+	postArticleHandler := func(w http.ResponseWriter, req *http.Request) {
+		io.WriteString(w, "Post Article...\n")
+	}
 
-	fmt.Println(q) // {160 60 }
+	articleListHandler := func(w http.ResponseWriter, req *http.Request) {
+		io.WriteString(w, "Article List...\n")
+	}
+
+	getArticleHandler := func(w http.ResponseWriter, req *http.Request) {
+		articleID := 1
+		resString := fmt.Sprintf("Article No.%d\n", articleID)
+		io.WriteString(w, resString)
+	}
+
+	postNiceHandler := func(w http.ResponseWriter, req *http.Request) {
+		io.WriteString(w, "Posting Nice...\n")
+	}
+
+	postCommentHandler := func(w http.ResponseWriter, req *http.Request) {
+		io.WriteString(w, "Posting Comment...")
+	}
+
+	http.HandleFunc("/hello", helloHandler)
+	http.HandleFunc("/article", postArticleHandler)
+	http.HandleFunc("/article/list", articleListHandler)
+	http.HandleFunc("article/1", getArticleHandler)
+	http.HandleFunc("/article/nice", postNiceHandler)
+	http.HandleFunc("/comment", postCommentHandler)
+
+	log.Println("server start at port 8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
