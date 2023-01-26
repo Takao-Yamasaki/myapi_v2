@@ -18,6 +18,17 @@ func HelloHandler(w http.ResponseWriter, req *http.Request) {
 
 // /articleのハンドラ
 func PostArticleHandler(w http.ResponseWriter, req *http.Request) {
+	// TODO: バイトスライスをなんらかの形で用意
+	var reqBodybuffer []byte
+
+	// リクエストボディの読み出し
+	if _, err := req.Body.Read(reqBodybuffer); !errors.ls(err, io.EOF) {
+		http.Error(w, "fail to get request body\n", http.StatusBadRequest)
+		return
+	}
+
+	defer req.Body.Close()
+	
 	article := models.Article1
 	jsonData, err := json.Marshal(article)
 	if err != nil {
@@ -61,7 +72,7 @@ func ArticleListHandler(w http.ResponseWriter, req *http.Request) {
 func GetArticleHandler(w http.ResponseWriter, req *http.Request) {
 	articleID, err := strconv.Atoi(mux.Vars(req)["id"])
 	if err != nil {
-		errString := fmt.Sprintf("Invalid query parameter (articleID %d)", articleID) 
+		errString := fmt.Sprintf("Invalid query parameter (articleID %d)", articleID)
 		http.Error(w, errString, http.StatusBadRequest)
 		return
 	}
