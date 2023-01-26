@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"strconv"
 
+	"github.com/Takao-Yamasaki/myapi_v2/models"
 	"github.com/gorilla/mux"
 )
 
@@ -16,7 +18,13 @@ func HelloHandler(w http.ResponseWriter, req *http.Request) {
 
 // /articleのハンドラ
 func PostArticleHandler(w http.ResponseWriter, req *http.Request) {
-	io.WriteString(w, "Post Article...\n")
+	article := models.Article1
+	jsonData, err := json.Marshal(article)
+	if err != nil {
+		http.Error(w, "fail to encode json\n", http.StatusInternalServerError)
+		return
+	}
+	w.Write(jsonData)
 }
 
 // /article/listのハンドラ
@@ -31,7 +39,8 @@ func ArticleListHandler(w http.ResponseWriter, req *http.Request) {
 
 		// 数値に変換できないのであれば400エラーを出す
 		if err != nil {
-			http.Error(w, "Invalid query parameter", http.StatusBadRequest)
+			errMsg := fmt.Sprintf("Invalid query parameter (page %d)", page)
+			http.Error(w, errMsg, http.StatusBadRequest)
 			return
 		}
 	} else {
@@ -39,27 +48,49 @@ func ArticleListHandler(w http.ResponseWriter, req *http.Request) {
 		page = 1
 	}
 
-	resString := fmt.Sprintf("Article List (page %d)\n", page)
-	io.WriteString(w, resString)
+	articleList := []models.Article{models.Article1, models.Article2}
+	jsonData, err := json.Marshal(articleList)
+	if err != nil {
+		http.Error(w, "fail to encode json", http.StatusBadRequest)
+		return
+	}
+	w.Write(jsonData)
 }
 
 // /article/1のハンドラ
 func GetArticleHandler(w http.ResponseWriter, req *http.Request) {
 	articleID, err := strconv.Atoi(mux.Vars(req)["id"])
 	if err != nil {
-		http.Error(w, "Invalid query parameter", http.StatusBadRequest)
+		errString := fmt.Sprintf("Invalid query parameter (articleID %d)", articleID) 
+		http.Error(w, errString, http.StatusBadRequest)
 		return
 	}
-	resString := fmt.Sprintf("Article No.%d\n", articleID)
-	io.WriteString(w, resString)
+
+	article := models.Article1
+	jsonData, err := json.Marshal(article)
+	if err != nil {
+		http.Error(w, "fail to encode json", http.StatusBadRequest)
+		return
+	}
+	w.Write(jsonData)
 }
 
 // /article/niceのハンドラ
 func PostNiceHandler(w http.ResponseWriter, req *http.Request) {
-	io.WriteString(w, "Posting Nice...\n")
+	article := models.Article1
+	jsonData, err := json.Marshal(article)
+	if err != nil {
+		http.Error(w, "fail to encode json", http.StatusBadRequest)
+	}
+	w.Write(jsonData)
 }
 
 // commentのハンドラ
 func PostCommentHandler(w http.ResponseWriter, req *http.Request) {
-	io.WriteString(w, "Posting Comment...\n")
+	comment := models.Comment1
+	jsonData, err := json.Marshal(comment)
+	if err != nil {
+		http.Error(w, "fail to encode json", http.StatusBadRequest)
+	}
+	w.Write(jsonData)
 }
