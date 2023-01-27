@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -27,12 +26,9 @@ func PostArticleHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	article := reqArticle
-	jsonData, err := json.Marshal(article)
-	if err != nil {
-		http.Error(w, "fail to encode json\n", http.StatusInternalServerError)
-		return
-	}
-	w.Write(jsonData)
+
+	// エンコーダの導入
+	json.NewEncoder(w).Encode(article)
 }
 
 // /article/listのハンドラ
@@ -57,12 +53,8 @@ func ArticleListHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	articleList := []models.Article{models.Article1, models.Article2}
-	jsonData, err := json.Marshal(articleList)
-	if err != nil {
-		http.Error(w, "fail to encode json", http.StatusBadRequest)
-		return
-	}
-	w.Write(jsonData)
+	// エンコード
+	json.NewEncoder(w).Encode(articleList)
 }
 
 // /article/1のハンドラ
@@ -75,30 +67,26 @@ func GetArticleHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	article := models.Article1
-	jsonData, err := json.Marshal(article)
-	if err != nil {
-		http.Error(w, "fail to encode json", http.StatusBadRequest)
-		return
-	}
-	w.Write(jsonData)
+	// エンコード
+	json.NewEncoder(w).Encode(article)
 }
 
 // /article/niceのハンドラ
 func PostNiceHandler(w http.ResponseWriter, req *http.Request) {
 	article := models.Article1
-	jsonData, err := json.Marshal(article)
-	if err != nil {
-		http.Error(w, "fail to encode json", http.StatusBadRequest)
+	if err := json.NewDecoder(req.Body).Decode(&article); err != nil {
+		http.Error(w, "fail to decode json", http.StatusBadRequest)
+		return
 	}
-	w.Write(jsonData)
+	json.NewEncoder(w).Encode(article)
 }
 
 // commentのハンドラ
 func PostCommentHandler(w http.ResponseWriter, req *http.Request) {
 	comment := models.Comment1
-	jsonData, err := json.Marshal(comment)
-	if err != nil {
-		http.Error(w, "fail to encode json", http.StatusBadRequest)
+	if err := json.NewDecoder(req.Body).Decode(&comment); err != nil {
+		http.Error(w, "fail to decode json", http.StatusBadRequest)
+		return
 	}
-	w.Write(jsonData)
+	json.NewEncoder(w).Encode(comment)
 }
