@@ -69,7 +69,7 @@ func SelectArticleDatail(db *sql.DB, articleID int) (models.Article, error) {
 		return models.Article{}, err
 	}
 
-	err := row.Scan(&article.ID, &article.Title, &article.Contents, &article.UserName, &article.NiceNum, &article.CommentList, &createdTime)
+	err := row.Scan(&article.ID, &article.Title, &article.Contents, &article.UserName, &article.NiceNum, &createdTime)
 	if err != nil {
 		return models.Article{}, err
 	}
