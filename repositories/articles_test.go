@@ -11,7 +11,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func TestSelectArticleDetail(t *testing.T) {
+func TestSelectArticleDetail1(t *testing.T) {
 	dbUser := "docker"
 	dbPassword := "docker"
 	dbDatabase := "sampledb"
@@ -55,5 +55,36 @@ func TestSelectArticleDetail(t *testing.T) {
 	}
 	if got.NiceNum != expected.NiceNum {
 		t.Errorf("NiceNum: get %d but want %d\n", got.NiceNum, expected.NiceNum)
+	}
+}
+
+func TestSelectArticleDetail2(t *testing.T) {
+	dbUser := "docker"
+	dbPassword := "docker"
+	dbDatabase := "sampledb"
+	dbConn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s?parseTime=true", dbUser, dbPassword, dbDatabase)
+
+	// データベースへ接続
+	db, err := sql.Open("mysql", dbConn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+
+	expected := models.Article{
+		ID:       2,
+		Title:    "2nd",
+		Contents: "Second blog post",
+		UserName: "saki",
+		NiceNum:  4,
+	}
+
+	got, err := repositories.SelectArticleDatail(db, expected.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got.ID != expected.ID {
+		t.Errorf("ID: get %d but want %d\n", got.ID, expected.ID)
 	}
 }
