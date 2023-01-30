@@ -1,8 +1,6 @@
 package repositories_test
 
 import (
-	"database/sql"
-	"fmt"
 	"testing"
 
 	"github.com/Takao-Yamasaki/myapi_v2/models"
