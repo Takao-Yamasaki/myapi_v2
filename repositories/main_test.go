@@ -3,6 +3,8 @@ package repositories_test
 import (
 	"database/sql"
 	"fmt"
+	"os"
+	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -29,4 +31,15 @@ func setup() error {
 // 全テスト共通の後処理を書く
 func teardown() {
 	testDB.Close()
+}
+
+func TestMain(m *testing.M) {
+	err := setup()
+	if err != nil {
+		os.Exit(1)
+	}
+
+	m.Run()
+
+	teardown()
 }
