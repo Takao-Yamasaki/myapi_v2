@@ -23,7 +23,6 @@ func TestSelectArticleList(t *testing.T) {
 }
 
 func TestSelectArticleDetail(t *testing.T) {
-	// テスト結果で期待する値の定義
 	tests := []struct {
 		testTitle string
 		expected  models.Article
@@ -35,7 +34,7 @@ func TestSelectArticleDetail(t *testing.T) {
 				Title:    "firstPost",
 				Contents: "This is my first blog",
 				UserName: "saki",
-				NiceNum:  3,
+				NiceNum:  2,
 			},
 		}, {
 			testTitle: "subtest2",
@@ -51,22 +50,19 @@ func TestSelectArticleDetail(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.testTitle, func(t *testing.T) {
-			// テスト対象となる関数の実行
-			got, err := repositories.SelectArticleDatail(testDB, test.expected.ID)
+			got, err := repositories.SelectArticleDetail(testDB, test.expected.ID)
 			if err != nil {
-				// エラーであれば、そもそもテストを実行することができないので、fatalでテストを終了させる
 				t.Fatal(err)
 			}
 
-			// 期待する出力と実際の出力が一致するか比較する
 			if got.ID != test.expected.ID {
 				t.Errorf("ID: get %d but want %d\n", got.ID, test.expected.ID)
 			}
 			if got.Title != test.expected.Title {
-				t.Errorf("Title: get %s but want %s", got.Title, test.expected.Title)
+				t.Errorf("Title: get %s but want %s\n", got.Title, test.expected.Title)
 			}
 			if got.Contents != test.expected.Contents {
-				t.Errorf("Contents: get %s but want %s", got.Contents, test.expected.Contents)
+				t.Errorf("Content: get %s but want %s\n", got.Contents, test.expected.Contents)
 			}
 			if got.UserName != test.expected.UserName {
 				t.Errorf("UserName: get %s but want %s\n", got.UserName, test.expected.UserName)
@@ -76,5 +72,61 @@ func TestSelectArticleDetail(t *testing.T) {
 			}
 		})
 	}
+}
 
+func TestInsertArticle(t *testing.T) {
+	article := models.Article{
+		Title:    "insertTest",
+		Contents: "testest",
+		UserName: "saki",
+	}
+
+	expectedArticleNum := 3
+	newArticle, err := repositories.InsertArticle(testDB, article)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if newArticle.ID != expectedArticleNum {
+		t.Errorf("new article id is expected %d but got %d", expectedArticleNum, newArticle.ID)
+	}
+
+	t.Cleanup(func() {
+		const sqlStr = `
+			delete from articles
+			where title = ? and contents = ? and username = ?;
+		`
+		testDB.Exec(sqlStr, article.Title, article.Contents, article.UserName)
+	})
+}
+
+func TestUpdateNiceNum(t *testing.T) {
+	articleID := 1
+
+	before, err := repositories.SelectArticleDetail(testDB, articleID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = repositories.UpdateNiceNum(testDB, articleID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	after, err := repositories.SelectArticleDetail(testDB, articleID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if after.NiceNum-before.NiceNum != 1 {
+		t.Errorf("fail to update nice num")
+	}
+
+	// TODO: この記述は今後削除か？
+	t.Cleanup(func() {
+		const sqlStr = `
+			update articles set nice = ?
+			where id = ?
+		`
+		testDB.Exec(sqlStr, before.NiceNum, articleID)
+	})
 }
