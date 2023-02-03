@@ -4,18 +4,22 @@ import (
 	"database/sql"
 
 	"github.com/Takao-Yamasaki/myapi_v2/models"
-	_ "github.com/go-sql-driver/mysql"
+)
+
+const (
+	articleNumPerPage = 5
 )
 
 func InsertArticle(db *sql.DB, article models.Article) (models.Article, error) {
 	const sqlStr = `
-		insert into articles (title, contents, username, nice, created_at)
-		values (?, ?, ?, 0, now());
+	insert into articles (title, contents, username, nice, created_at) values
+	(?, ?, ?, 0, now());
 	`
-	var newArticle models.Article
-	newArticle.Title, newArticle.Contents, newArticle.UserName, newArticle.NiceNum, newArticle.CreatedAt = article.Title, article.Contents, article.UserName, article.NiceNum, article.CreatedAt
 
-	result, err := db.Exec(sqlStr, article.Title, article.Contents, article.UserName, article.NiceNum, article.CreatedAt)
+	var newArticle models.Article
+	newArticle.Title, newArticle.Contents, newArticle.UserName = article.Title, article.Contents, article.UserName
+
+	result, err := db.Exec(sqlStr, article.Title, article.Contents, article.UserName)
 	if err != nil {
 		return models.Article{}, err
 	}
@@ -34,23 +38,25 @@ func SelectArticleList(db *sql.DB, page int) ([]models.Article, error) {
 	const sqlStr = `
 		select article_id, title, contents, username, nice
 		from articles
-		limit ? offset ?
+		limit ? offset ?;
 	`
-	articleArray := make([]models.Article, 0)
 
-	rows, err := db.Query(sqlStr, 5, page)
+	rows, err := db.Query(sqlStr, articleNumPerPage, ((page - 1) * articleNumPerPage))
 	if err != nil {
-		return []models.Article{}, err
+		return nil, err
 	}
+	defer rows.Close()
 
-	var article models.Article
+	articleArray := make([]models.Article, 0)
 	for rows.Next() {
+		var article models.Article
 		err = rows.Scan(&article.ID, &article.Title, &article.Contents, &article.UserName, &article.NiceNum)
 		if err != nil {
 			return []models.Article{}, err
 		}
 		articleArray = append(articleArray, article)
 	}
+
 	return articleArray, nil
 }
 
@@ -60,15 +66,13 @@ func SelectArticleDetail(db *sql.DB, articleID int) (models.Article, error) {
 		from articles
 		where article_id = ?;
 	`
-
-	var article models.Article
-	var createdTime sql.NullTime
-
 	row := db.QueryRow(sqlStr, articleID)
 	if err := row.Err(); err != nil {
 		return models.Article{}, err
 	}
 
+	var article models.Article
+	var createdTime sql.NullTime
 	err := row.Scan(&article.ID, &article.Title, &article.Contents, &article.UserName, &article.NiceNum, &createdTime)
 	if err != nil {
 		return models.Article{}, err

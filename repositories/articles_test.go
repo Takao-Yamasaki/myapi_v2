@@ -5,14 +5,14 @@ import (
 
 	"github.com/Takao-Yamasaki/myapi_v2/models"
 	"github.com/Takao-Yamasaki/myapi_v2/repositories"
-	"github.com/Takao-Yamasaki/myapi_v2/testdata"
+	"github.com/Takao-Yamasaki/myapi_v2/repositories/testdata"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 func TestSelectArticleList(t *testing.T) {
 	// テスト対象となる関数の実行
-	expectedNum := 2
+	expectedNum := len(testdata.ArticleTestData)
 	got, err := repositories.SelectArticleList(testDB, 1)
 	if err != nil {
 		t.Fatal(err)
@@ -73,16 +73,16 @@ func TestInsertArticle(t *testing.T) {
 	expectedArticleNum := 3
 	newArticle, err := repositories.InsertArticle(testDB, article)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	if newArticle.ID != expectedArticleNum {
-		t.Errorf("new article id is expected %d but got %d", expectedArticleNum, newArticle.ID)
+		t.Errorf("new article id is expected %d but got %d\n", expectedArticleNum, newArticle.ID)
 	}
 
 	t.Cleanup(func() {
 		const sqlStr = `
 			delete from articles
-			where title = ? and contents = ? and username = ?;
+			where title = ? and contents = ? and username = ?
 		`
 		testDB.Exec(sqlStr, article.Title, article.Contents, article.UserName)
 	})
@@ -90,32 +90,16 @@ func TestInsertArticle(t *testing.T) {
 
 func TestUpdateNiceNum(t *testing.T) {
 	articleID := 1
-
-	before, err := repositories.SelectArticleDetail(testDB, articleID)
+	err := repositories.UpdateNiceNum(testDB, articleID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = repositories.UpdateNiceNum(testDB, articleID)
-	if err != nil {
-		t.Fatal(err)
-	}
+	got, _ := repositories.SelectArticleDetail(testDB, articleID)
 
-	after, err := repositories.SelectArticleDetail(testDB, articleID)
-	if err != nil {
-		t.Fatal(err)
+	if got.NiceNum-testdata.ArticleTestData[articleID-1].NiceNum != 1 {
+		t.Errorf("fail to update nice num: expected %d but got %d\n",
+			testdata.ArticleTestData[articleID].NiceNum,
+			got.NiceNum)
 	}
-
-	if after.NiceNum-before.NiceNum != 1 {
-		t.Errorf("fail to update nice num")
-	}
-
-	// TODO: この記述は今後削除か？
-	t.Cleanup(func() {
-		const sqlStr = `
-			update articles set nice = ?
-			where id = ?
-		`
-		testDB.Exec(sqlStr, before.NiceNum, articleID)
-	})
 }
