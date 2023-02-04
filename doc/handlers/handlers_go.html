@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>handlers.go - RDoc Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../";
+  var index_rel_prefix = "../";
+</script>
+
+<script src="../js/navigation.js" defer></script>
+<script src="../js/search.js" defer></script>
+<script src="../js/search_index.js" defer></script>
+<script src="../js/searcher.js" defer></script>
+<script src="../js/darkfish.js" defer></script>
+
+<link href="../css/fonts.css" rel="stylesheet">
+<link href="../css/rdoc.css" rel="stylesheet">
+
+
+<body id="top" role="document" class="file">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../table_of_contents.html#pages">Pages</a>
+    <a href="../table_of_contents.html#classes">Classes</a>
+    <a href="../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="project-metadata">
+    
+<div id="fileindex-section" class="nav-section">
+  <h3>Pages</h3>
+
+  <ul class="link-list">
+    <li><a href="../go_mod.html">go.mod</a>
+    <li><a href="../go_sum.html">go.sum</a>
+    <li><a href="../handlers/handlers_go.html">handlers.go</a>
+    <li><a href="../main_go.html">main.go</a>
+    <li><a href="../models/data_go.html">data.go</a>
+    <li><a href="../models/models_go.html">models.go</a>
+    <li><a href="../repositories/articles_go.html">articles.go</a>
+    <li><a href="../repositories/articles_test_go.html">articles_test.go</a>
+    <li><a href="../repositories/comment_test_go.html">comment_test.go</a>
+    <li><a href="../repositories/comments_go.html">comments.go</a>
+    <li><a href="../repositories/main_test_go.html">main_test.go</a>
+    <li><a href="../repositories/testdata/cleanupDB_sql.html">cleanupDB.sql</a>
+    <li><a href="../repositories/testdata/data_go.html">data.go</a>
+    <li><a href="../repositories/testdata/setupDB_sql.html">setupDB.sql</a>
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-label="Page handlers/handlers.go">
+
+<p>package handlers</p>
+
+<p>import (</p>
+
+<pre class="ruby"><span class="ruby-string">&quot;encoding/json&quot;</span>
+<span class="ruby-string">&quot;fmt&quot;</span>
+<span class="ruby-string">&quot;io&quot;</span>
+<span class="ruby-string">&quot;net/http&quot;</span>
+<span class="ruby-string">&quot;strconv&quot;</span>
+
+<span class="ruby-string">&quot;github.com/Takao-Yamasaki/myapi_v2/models&quot;</span>
+<span class="ruby-string">&quot;github.com/gorilla/mux&quot;</span>
+</pre>
+
+<p>)</p>
+
+<p>// /helloのハンドラ func HelloHandler(w http.ResponseWriter, req *http.Request) {</p>
+
+<pre class="ruby"><span class="ruby-identifier">io</span>.<span class="ruby-constant">WriteString</span>(<span class="ruby-identifier">w</span>, <span class="ruby-string">&quot;Hello, world!\n&quot;</span>)
+</pre>
+
+<p>}</p>
+
+<p>// /articleのハンドラ func PostArticleHandler(w http.ResponseWriter, req *http.Request) {</p>
+
+<pre>var reqArticle models.Article
+
+// デコーダの導入
+if err := json.NewDecoder(req.Body).Decode(&amp;reqArticle); err != nil {
+        http.Error(w, &quot;fail to decode json\n&quot;, http.StatusBadRequest)
+}
+
+article := reqArticle
+
+// エンコーダの導入
+json.NewEncoder(w).Encode(article)</pre>
+
+<p>}</p>
+
+<p>// /article/listのハンドラ func ArticleListHandler(w http.ResponseWriter, req *http.Request) {</p>
+
+<pre>queryMap := req.URL.Query()
+
+var page int
+// パラメータのpageが1つ以上あるなら
+if p, ok := queryMap[&quot;page&quot;]; ok &amp;&amp; len(p) &gt; 0 {
+        var err error
+        page, err = strconv.Atoi(p[0])
+
+        // 数値に変換できないのであれば400エラーを出す
+        if err != nil {
+                errMsg := fmt.Sprintf(&quot;Invalid query parameter (page %d)&quot;, page)
+                http.Error(w, errMsg, http.StatusBadRequest)
+                return
+        }
+} else {
+        // pageが存在しない場合
+        page = 1
+}
+
+articleList := []models.Article{models.Article1, models.Article2}
+// エンコード
+json.NewEncoder(w).Encode(articleList)</pre>
+
+<p>}</p>
+
+<p>// /article/1のハンドラ func GetArticleHandler(w http.ResponseWriter, req *http.Request) {</p>
+
+<pre>articleID, err := strconv.Atoi(mux.Vars(req)[&quot;id&quot;])
+if err != nil {
+        errString := fmt.Sprintf(&quot;Invalid query parameter (articleID %d)&quot;, articleID)
+        http.Error(w, errString, http.StatusBadRequest)
+        return
+}
+
+article := models.Article1
+// エンコード
+json.NewEncoder(w).Encode(article)</pre>
+
+<p>}</p>
+
+<p>// /article/niceのハンドラ func PostNiceHandler(w http.ResponseWriter, req *http.Request) {</p>
+
+<pre>article := models.Article1
+if err := json.NewDecoder(req.Body).Decode(&amp;article); err != nil {
+        http.Error(w, &quot;fail to decode json&quot;, http.StatusBadRequest)
+        return
+}
+json.NewEncoder(w).Encode(article)</pre>
+
+<p>}</p>
+
+<p>// commentのハンドラ func PostCommentHandler(w http.ResponseWriter, req *http.Request) {</p>
+
+<pre>comment := models.Comment1
+if err := json.NewDecoder(req.Body).Decode(&amp;comment); err != nil {
+        http.Error(w, &quot;fail to decode json&quot;, http.StatusBadRequest)
+        return
+}
+json.NewEncoder(w).Encode(comment)</pre>
+
+<p>}</p>
+
+</main>
+
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="https://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="https://ruby.github.io/rdoc/">RDoc</a> 6.3.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

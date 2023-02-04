@@ -1,11 +1,11 @@
+// リポジトリ層です
 package repositories_test
 
 import (
-	"testing"
-
 	"github.com/Takao-Yamasaki/myapi_v2/models"
 	"github.com/Takao-Yamasaki/myapi_v2/repositories"
 	"github.com/Takao-Yamasaki/myapi_v2/repositories/testdata"
+	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
 )

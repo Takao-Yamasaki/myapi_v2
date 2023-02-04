@@ -1,3 +1,6 @@
+/*
+リポジトリ層
+*/
 package repositories
 
 import (
@@ -10,6 +13,7 @@ const (
 	articleNumPerPage = 5
 )
 
+// 記事を挿入する関数
 func InsertArticle(db *sql.DB, article models.Article) (models.Article, error) {
 	const sqlStr = `
 	insert into articles (title, contents, username, nice, created_at) values
