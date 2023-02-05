@@ -1,0 +1,7 @@
+{
+  "chatgpt.promptPrefix.addComments": "以下のコードにコメントを追加してください。",
+  "chatgpt.promptPrefix.addTests": "以下のコードのテストを実装してください。",
+  "chatgpt.promptPrefix.explain": "以下ののコードを説明してください。",
+  "chatgpt.promptPrefix.findProblems": "以下のコードで問題を発見してください。",
+  "chatgpt.promptPrefix.optimize": "以下のコードを最適化してください。"
+}
