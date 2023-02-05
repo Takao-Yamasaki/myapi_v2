@@ -5,6 +5,7 @@ package repositories
 
 import (
 	"database/sql"
+	"log"
 
 	"github.com/Takao-Yamasaki/myapi_v2/models"
 )
@@ -39,6 +40,7 @@ func InsertArticle(db *sql.DB, article models.Article) (models.Article, error) {
 }
 
 func SelectArticleList(db *sql.DB, page int) ([]models.Article, error) {
+	log.Println("repositories: start")
 	const sqlStr = `
 		select article_id, title, contents, username, nice
 		from articles
@@ -47,6 +49,7 @@ func SelectArticleList(db *sql.DB, page int) ([]models.Article, error) {
 
 	rows, err := db.Query(sqlStr, articleNumPerPage, ((page - 1) * articleNumPerPage))
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -56,11 +59,12 @@ func SelectArticleList(db *sql.DB, page int) ([]models.Article, error) {
 		var article models.Article
 		err = rows.Scan(&article.ID, &article.Title, &article.Contents, &article.UserName, &article.NiceNum)
 		if err != nil {
+			log.Println(err)
 			return []models.Article{}, err
 		}
 		articleArray = append(articleArray, article)
 	}
-
+	log.Printf("repositories: %v", articleArray)
 	return articleArray, nil
 }
 

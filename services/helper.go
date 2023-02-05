@@ -7,13 +7,13 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"os"
+	_ "os"
 )
 
 var (
-	dbUser     = os.Getenv("DB_USER")
-	dbPassword = os.Getenv("DB_PASSWORD")
-	dbDatabase = os.Getenv("DB_NAME")
+	dbUser     = "docker"
+	dbPassword = "docker"
+	dbDatabase = "sampledb"
 	dbConn     = fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s?parseTime=true", dbUser, dbPassword, dbDatabase)
 )
 

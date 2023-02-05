@@ -4,6 +4,9 @@
 package services
 
 import (
+	_ "fmt"
+	"log"
+
 	"github.com/Takao-Yamasaki/myapi_v2/models"
 	"github.com/Takao-Yamasaki/myapi_v2/repositories"
 )
@@ -32,6 +35,7 @@ func GetArticleListService(page int) ([]models.Article, error) {
 	defer db.Close()
 
 	articleList, err := repositories.SelectArticleList(db, page)
+	log.Printf("service: %v", articleList)
 	if err != nil {
 		return []models.Article{}, nil
 	}

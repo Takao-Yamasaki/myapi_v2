@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/Takao-Yamasaki/myapi_v2/models"
+	"github.com/Takao-Yamasaki/myapi_v2/services"
 	"github.com/gorilla/mux"
 )
 
@@ -25,8 +27,11 @@ func PostArticleHandler(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
 	}
 
-	// TODO:リクエストボディから取得したデータをDBに挿入して、実装にデータベースに格納した値を得る
-	article := reqArticle
+	article, err := services.PostArticleService(reqArticle)
+	if err != nil {
+		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
+		return
+	}
 
 	// エンコーダの導入
 	json.NewEncoder(w).Encode(article)
@@ -53,8 +58,13 @@ func ArticleListHandler(w http.ResponseWriter, req *http.Request) {
 		page = 1
 	}
 
-	// TODO: 記事一覧をデータベースから取得する
-	articleList := []models.Article{models.Article1, models.Article2}
+	articleList, err := services.GetArticleListService(page)
+	log.Printf("handler: %v", articleList)
+	if err != nil {
+		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
+		return
+	}
+
 	// エンコード
 	json.NewEncoder(w).Encode(articleList)
 }
@@ -67,20 +77,28 @@ func ArticleDetailHandler(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, errString, http.StatusBadRequest)
 		return
 	}
-	// TODO: サービス層の機能：指定IDの記事をDBから取得する
-	article := models.Article1
+
+	article, err := services.GetArticleService(articleID)
+	if err != nil {
+		http.Error(w, "fail to internal exec\n", http.StatusInternalServerError)
+		return
+	}
 	// エンコード
 	json.NewEncoder(w).Encode(article)
 }
 
 // /article/niceのハンドラ
 func PostNiceHandler(w http.ResponseWriter, req *http.Request) {
-	article := models.Article1
-	if err := json.NewDecoder(req.Body).Decode(&article); err != nil {
+	var reqArticle models.Article
+	if err := json.NewDecoder(req.Body).Decode(&reqArticle); err != nil {
 		http.Error(w, "fail to decode json", http.StatusBadRequest)
 		return
 	}
-	// TODO:指定した記事にいいね+1する更新作業をDBに保存する
+	article, err := services.PostNiceService(reqArticle)
+	if err != nil {
+		http.Error(w, "fail to internal exec\n", http.StatusInternalServerError)
+		return
+	}
 	json.NewEncoder(w).Encode(article)
 }
 
@@ -91,8 +109,11 @@ func PostCommentHandler(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "fail to decode json", http.StatusBadRequest)
 		return
 	}
-	// TODO: DBを挿入して、実際DBに格納された値を得る
-	comment := reqComment
 
+	comment, err := services.PostCommentService(reqComment)
+	if err != nil {
+		http.Error(w, "fail to internal exec\n", http.StatusInternalServerError)
+		return
+	}
 	json.NewEncoder(w).Encode(comment)
 }
