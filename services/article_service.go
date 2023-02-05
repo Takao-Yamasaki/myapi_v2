@@ -12,14 +12,8 @@ import (
 )
 
 // 記事データをDB内に挿入し、その値を返す
-func PostArticleService(article models.Article) (models.Article, error) {
-	db, err := connectDB()
-	if err != nil {
-		return models.Article{}, nil
-	}
-	defer db.Close()
-
-	newArticle, err := repositories.InsertArticle(db, article)
+func (s *MyAppService) PostArticleService(article models.Article) (models.Article, error) {
+	newArticle, err := repositories.InsertArticle(s.db, article)
 	if err != nil {
 		return models.Article{}, nil
 	}
@@ -27,14 +21,8 @@ func PostArticleService(article models.Article) (models.Article, error) {
 }
 
 // クエリパラメータで指定したページの記事一覧をDBから取得する
-func GetArticleListService(page int) ([]models.Article, error) {
-	db, err := connectDB()
-	if err != nil {
-		return []models.Article{}, err
-	}
-	defer db.Close()
-
-	articleList, err := repositories.SelectArticleList(db, page)
+func (s *MyAppService) GetArticleListService(page int) ([]models.Article, error) {
+	articleList, err := repositories.SelectArticleList(s.db, page)
 	log.Printf("service: %v", articleList)
 	if err != nil {
 		return []models.Article{}, nil
@@ -43,19 +31,13 @@ func GetArticleListService(page int) ([]models.Article, error) {
 }
 
 // 指定IDの記事をDBから取得する
-func GetArticleService(articleID int) (models.Article, error) {
-	db, err := connectDB()
-	if err != nil {
-		return models.Article{}, nil
-	}
-	defer db.Close()
-
-	article, err := repositories.SelectArticleDetail(db, articleID)
+func (s *MyAppService) GetArticleService(articleID int) (models.Article, error) {
+	article, err := repositories.SelectArticleDetail(s.db, articleID)
 	if err != nil {
 		return models.Article{}, err
 	}
 
-	commentList, err := repositories.SelectCommentList(db, articleID)
+	commentList, err := repositories.SelectCommentList(s.db, articleID)
 	if err != nil {
 		return models.Article{}, err
 	}
@@ -66,14 +48,8 @@ func GetArticleService(articleID int) (models.Article, error) {
 }
 
 // 指定IDの記事のいいね数を+1して、結果を返却
-func PostNiceService(article models.Article) (models.Article, error) {
-	db, err := connectDB()
-	if err != nil {
-		return models.Article{}, nil
-	}
-	defer db.Close()
-
-	if err = repositories.UpdateNiceNum(db, article.ID); err != nil {
+func (s *MyAppService) PostNiceService(article models.Article) (models.Article, error) {
+	if err := repositories.UpdateNiceNum(s.db, article.ID); err != nil {
 		return models.Article{}, err
 	}
 
