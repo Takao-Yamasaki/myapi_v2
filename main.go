@@ -10,7 +10,6 @@ import (
 	"github.com/Takao-Yamasaki/myapi_v2/routers"
 	"github.com/Takao-Yamasaki/myapi_v2/services"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/gorilla/mux"
 )
 
 var (

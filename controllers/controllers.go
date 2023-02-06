@@ -8,18 +8,18 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Takao-Yamasaki/myapi_v2/controllers/services"
 	"github.com/Takao-Yamasaki/myapi_v2/models"
-	"github.com/Takao-Yamasaki/myapi_v2/services"
 	"github.com/gorilla/mux"
 )
 
 // コントローラ構造体
 type MyAppController struct {
-	service *services.MyAppService
+	service services.MyAppServicer
 }
 
 // コンストラクタの定義
-func NewMyAppController(s *services.MyAppService) *MyAppController {
+func NewMyAppController(s services.MyAppServicer) *MyAppController {
 	return &MyAppController{service: s}
 }
 
