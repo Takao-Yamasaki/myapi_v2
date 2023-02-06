@@ -15,12 +15,13 @@ import (
 
 // コントローラ構造体
 type MyAppController struct {
-	service services.MyAppServicer
+	aService services.ArticleServicer
+	cService services.CommentServicer
 }
 
 // コンストラクタの定義
-func NewMyAppController(s services.MyAppServicer) *MyAppController {
-	return &MyAppController{service: s}
+func NewMyAppController(as services.ArticleServicer, cs services.CommentServicer) *MyAppController {
+	return &MyAppController{aService: as, cService: cs}
 }
 
 // /helloのハンドラ
