@@ -6,9 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Takao-Yamasaki/myapi_v2/controllers"
-	"github.com/Takao-Yamasaki/myapi_v2/routers"
-	"github.com/Takao-Yamasaki/myapi_v2/services"
+	"github.com/Takao-Yamasaki/myapi_v2/api"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -26,13 +24,7 @@ func main() {
 		return
 	}
 
-	// サーバー全体で使用するMyAppServiceを1つ作成する
-	ser := services.NewMyAppService(db)
-
-	// サーバー全体で使用するMyAppControllerを1つ作成する
-	con := controllers.NewMyAppController(ser)
-
-	r := routers.NewRouter(con)
+	r := api.NewRouter(db)
 
 	log.Println("server start at port 8080")
 	log.Fatal(http.ListenAndServe(":8080", r))

@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"strconv"
@@ -13,24 +12,23 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// コントローラ構造体
-type MyAppController struct {
-	aService services.ArticleServicer
-	cService services.CommentServicer
+// Article用サービスインターフェース
+type ArticleController struct {
+	service services.ArticleServicer
 }
 
-// コンストラクタの定義
-func NewMyAppController(as services.ArticleServicer, cs services.CommentServicer) *MyAppController {
-	return &MyAppController{aService: as, cService: cs}
+// コンストラクタ関数
+func NewArticleController(s services.ArticleServicer) *ArticleController {
+	return &ArticleController{service: s}
 }
 
 // /helloのハンドラ
-func HelloHandler(w http.ResponseWriter, req *http.Request) {
-	io.WriteString(w, "Hello, world!\n")
-}
+// func HelloHandler(w http.ResponseWriter, req *http.Request) {
+// 	io.WriteString(w, "Hello, world!\n")
+// }
 
 // /articleのハンドラ
-func (c *MyAppController) PostArticleHandler(w http.ResponseWriter, req *http.Request) {
+func (c *ArticleController) PostArticleHandler(w http.ResponseWriter, req *http.Request) {
 	var reqArticle models.Article
 
 	// デコーダの導入
@@ -49,7 +47,7 @@ func (c *MyAppController) PostArticleHandler(w http.ResponseWriter, req *http.Re
 }
 
 // /article/listのハンドラ
-func (c *MyAppController) ArticleListHandler(w http.ResponseWriter, req *http.Request) {
+func (c *ArticleController) ArticleListHandler(w http.ResponseWriter, req *http.Request) {
 	queryMap := req.URL.Query()
 
 	var page int
@@ -81,7 +79,7 @@ func (c *MyAppController) ArticleListHandler(w http.ResponseWriter, req *http.Re
 }
 
 // /article/1のハンドラ
-func (c *MyAppController) ArticleDetailHandler(w http.ResponseWriter, req *http.Request) {
+func (c *ArticleController) ArticleDetailHandler(w http.ResponseWriter, req *http.Request) {
 	articleID, err := strconv.Atoi(mux.Vars(req)["id"])
 	if err != nil {
 		errString := fmt.Sprintf("Invalid query parameter (articleID %d)", articleID)
@@ -99,7 +97,7 @@ func (c *MyAppController) ArticleDetailHandler(w http.ResponseWriter, req *http.
 }
 
 // /article/niceのハンドラ
-func (c *MyAppController) PostNiceHandler(w http.ResponseWriter, req *http.Request) {
+func (c *ArticleController) PostNiceHandler(w http.ResponseWriter, req *http.Request) {
 	var reqArticle models.Article
 	if err := json.NewDecoder(req.Body).Decode(&reqArticle); err != nil {
 		http.Error(w, "fail to decode json", http.StatusBadRequest)
@@ -111,20 +109,4 @@ func (c *MyAppController) PostNiceHandler(w http.ResponseWriter, req *http.Reque
 		return
 	}
 	json.NewEncoder(w).Encode(article)
-}
-
-// commentのハンドラ
-func (c *MyAppController) PostCommentHandler(w http.ResponseWriter, req *http.Request) {
-	var reqComment models.Comment
-	if err := json.NewDecoder(req.Body).Decode(&reqComment); err != nil {
-		http.Error(w, "fail to decode json", http.StatusBadRequest)
-		return
-	}
-
-	comment, err := c.service.PostCommentService(reqComment)
-	if err != nil {
-		http.Error(w, "fail to internal exec\n", http.StatusInternalServerError)
-		return
-	}
-	json.NewEncoder(w).Encode(comment)
 }
