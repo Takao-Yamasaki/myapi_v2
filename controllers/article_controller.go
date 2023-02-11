@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -68,7 +67,6 @@ func (c *ArticleController) ArticleListHandler(w http.ResponseWriter, req *http.
 	}
 
 	articleList, err := c.service.GetArticleListService(page)
-	log.Printf("handler: %v", articleList)
 	if err != nil {
 		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
 		return
