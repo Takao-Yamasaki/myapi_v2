@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gorilla/mux"
 )
 
 func TestArticleListHandler(t *testing.T) {
@@ -58,8 +60,14 @@ func TestArticleDetailHandler(t *testing.T) {
 			// httptest.ResponseRecorder構造体を用意
 			res := httptest.NewRecorder()
 
-			// ハンドラメソッドの実行
-			aCon.ArticleDetailHandler(res, req)
+			// ルータを用意
+			r := mux.NewRouter()
+
+			// テストで使うパスとハンドラの対応関係をルータに登録
+			r.HandleFunc("/article/{id:[0-9]}+", aCon.ArticleDetailHandler).Methods(http.MethodGet)
+
+			// ルータ経由でリクエストを送信
+			r.ServeHTTP(res, req)
 
 			if res.Code != tt.resultCode {
 				t.Errorf("unexpected StatusCode want %d but %d\n", tt.resultCode, res.Code)
