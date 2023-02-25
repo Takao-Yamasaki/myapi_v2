@@ -60,7 +60,7 @@ func (c *ArticleController) ArticleListHandler(w http.ResponseWriter, req *http.
 
 		// 数値に変換できないのであれば400エラーを出す
 		if err != nil {
-			err = apperrors.BadPathParam.Wrap(err, "pathparam must be number")
+			err = apperrors.BadParam.Wrap(err, "pathparam must be number")
 			apperrors.ErrorHandler(w, req, err)
 			return
 		}
@@ -83,7 +83,7 @@ func (c *ArticleController) ArticleListHandler(w http.ResponseWriter, req *http.
 func (c *ArticleController) ArticleDetailHandler(w http.ResponseWriter, req *http.Request) {
 	articleID, err := strconv.Atoi(mux.Vars(req)["id"])
 	if err != nil {
-		err = apperrors.BadPathParam.Wrap(err, "pathparam must be number")
+		err = apperrors.BadParam.Wrap(err, "pathparam must be number")
 		apperrors.ErrorHandler(w, req, err)
 		return
 	}
