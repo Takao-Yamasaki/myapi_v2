@@ -22,13 +22,13 @@ func (c *CommentController) PostCommentHandler(w http.ResponseWriter, req *http.
 	var reqComment models.Comment
 	if err := json.NewDecoder(req.Body).Decode(&reqComment); err != nil {
 		err = apperrors.ReqBodyDecodeFailed.Wrap(err, "bad request body")
-		http.Error(w, "fail to decode json", http.StatusBadRequest)
+		apperrors.ErrorHandler(w, req, err)
 		return
 	}
 
 	comment, err := c.service.PostCommentService(reqComment)
 	if err != nil {
-		http.Error(w, "fail to internal exec\n", http.StatusInternalServerError)
+		apperrors.ErrorHandler(w, req, err)
 		return
 	}
 	json.NewEncoder(w).Encode(comment)
