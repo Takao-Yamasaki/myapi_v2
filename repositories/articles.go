@@ -5,7 +5,6 @@ package repositories
 
 import (
 	"database/sql"
-	"log"
 
 	"github.com/Takao-Yamasaki/myapi_v2/models"
 )
@@ -29,10 +28,7 @@ func InsertArticle(db *sql.DB, article models.Article) (models.Article, error) {
 		return models.Article{}, err
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return models.Article{}, err
-	}
+	id, _ := result.LastInsertId()
 
 	newArticle.ID = int(id)
 
@@ -40,7 +36,6 @@ func InsertArticle(db *sql.DB, article models.Article) (models.Article, error) {
 }
 
 func SelectArticleList(db *sql.DB, page int) ([]models.Article, error) {
-	log.Println("repositories: start")
 	const sqlStr = `
 		select article_id, title, contents, username, nice
 		from articles
@@ -49,7 +44,6 @@ func SelectArticleList(db *sql.DB, page int) ([]models.Article, error) {
 
 	rows, err := db.Query(sqlStr, articleNumPerPage, ((page - 1) * articleNumPerPage))
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -57,14 +51,11 @@ func SelectArticleList(db *sql.DB, page int) ([]models.Article, error) {
 	articleArray := make([]models.Article, 0)
 	for rows.Next() {
 		var article models.Article
-		err = rows.Scan(&article.ID, &article.Title, &article.Contents, &article.UserName, &article.NiceNum)
-		if err != nil {
-			log.Println(err)
-			return []models.Article{}, err
-		}
+		rows.Scan(&article.ID, &article.Title, &article.Contents, &article.UserName, &article.NiceNum)
+
 		articleArray = append(articleArray, article)
 	}
-	log.Printf("repositories: %v", articleArray)
+
 	return articleArray, nil
 }
 
@@ -94,39 +85,37 @@ func SelectArticleDetail(db *sql.DB, articleID int) (models.Article, error) {
 }
 
 func UpdateNiceNum(db *sql.DB, articleID int) error {
-	const sqlGetNice = `
-		select nice
-		from articles
-		where article_id = ?;
-	`
-
-	const sqlUpdateNice = `update articles set nice = ? where article_id = ?`
-
 	tx, err := db.Begin()
 	if err != nil {
 		return err
 	}
 
+	const sqlGetNice = `
+		select nice
+		from articles
+		where article_id = ?;
+	`
 	row := tx.QueryRow(sqlGetNice, articleID)
 	if err := row.Err(); err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	var article models.Article
-	if err = row.Scan(&article.NiceNum); err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	_, err = tx.Exec(sqlUpdateNice, article.NiceNum+1, articleID)
+	var nicenum int
+	err = row.Scan(&nicenum)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if err = tx.Commit(); err != nil {
+	const sqlUpdateNice = `update articles set nice = ? where article_id = ?`
+	_, err = tx.Exec(sqlUpdateNice, nicenum+1, articleID)
+	if err != nil {
 		tx.Rollback()
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
 		return err
 	}
 	return nil
