@@ -18,7 +18,7 @@ func (s *MyAppService) PostArticleService(article models.Article) (models.Articl
 	if err != nil {
 		// 構造体にエラーをセットしていく
 		err = apperrors.InsertDataFailed.Wrap(err, "fail to record data")
-		return models.Article{}, nil
+		return models.Article{}, err
 	}
 	return newArticle, nil
 }
@@ -32,7 +32,7 @@ func (s *MyAppService) GetArticleListService(page int) ([]models.Article, error)
 	}
 
 	if len(articleList) == 0 {
-		err := apperrors.NAData.Wrap(ErrNoDara, "no data")
+		err := apperrors.NAData.Wrap(ErrNoData, "no data")
 		return nil, err
 	}
 	return articleList, nil
@@ -49,7 +49,6 @@ func (s *MyAppService) GetArticleService(articleID int) (models.Article, error) 
 		err = apperrors.GetDataFailed.Wrap(err, "fail to get data")
 		return models.Article{}, err
 	}
-
 	commentList, err := repositories.SelectCommentList(s.db, articleID)
 	if err != nil {
 		err = apperrors.GetDataFailed.Wrap(err, "fail to get data")
@@ -73,12 +72,11 @@ func (s *MyAppService) PostNiceService(article models.Article) (models.Article, 
 	}
 
 	return models.Article{
-		ID:          article.ID,
-		Title:       article.Title,
-		Contents:    article.Contents,
-		UserName:    article.UserName,
-		NiceNum:     article.NiceNum + 1,
-		CommentList: article.CommentList,
-		CreatedAt:   article.CreatedAt,
+		ID:        article.ID,
+		Title:     article.Title,
+		Contents:  article.Contents,
+		UserName:  article.UserName,
+		NiceNum:   article.NiceNum + 1,
+		CreatedAt: article.CreatedAt,
 	}, nil
 }
