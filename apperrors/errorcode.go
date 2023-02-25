@@ -14,5 +14,9 @@ const (
 
 	// コントローラ層
 	ReqBodyDecodeFailed ErrCode = "R001"
-	BadParam            ErrCode = "R002"
+	BadPathParam        ErrCode = "R002"
 )
+
+func (code ErrCode) Wrap(err error, message string) error {
+	return &MyAppError{ErrCode: code, Message: message, Err: err}
+}
