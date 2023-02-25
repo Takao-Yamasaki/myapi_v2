@@ -47,8 +47,8 @@ func TestArticleDetailHandler(t *testing.T) {
 		articleID  string
 		resultCode int
 	}{
-		{name: "number pathparm", articleID: "1", resultCode: http.StatusOK},
-		{name: "alphabet pathparm", articleID: "aaa", resultCode: http.StatusNotFound},
+		{name: "number pathparam", articleID: "1", resultCode: http.StatusOK},
+		{name: "alphabet pathparam", articleID: "aaa", resultCode: http.StatusNotFound},
 	}
 	// テーブルドリブンに実行
 	for _, tt := range tests {
@@ -64,13 +64,13 @@ func TestArticleDetailHandler(t *testing.T) {
 			r := mux.NewRouter()
 
 			// テストで使うパスとハンドラの対応関係をルータに登録
-			r.HandleFunc("/article/{id:[0-9]}+", aCon.ArticleDetailHandler).Methods(http.MethodGet)
+			r.HandleFunc("/article/{id:[0-9]+}", aCon.ArticleDetailHandler).Methods(http.MethodGet)
 
 			// ルータ経由でリクエストを送信
 			r.ServeHTTP(res, req)
 
 			if res.Code != tt.resultCode {
-				t.Errorf("unexpected StatusCode want %d but %d\n", tt.resultCode, res.Code)
+				t.Errorf("unexpected StatusCode: want %d but %d\n", tt.resultCode, res.Code)
 			}
 		})
 	}
