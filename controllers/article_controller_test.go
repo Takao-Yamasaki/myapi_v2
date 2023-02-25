@@ -37,3 +37,33 @@ func TestArticleListHandler(t *testing.T) {
 		})
 	}
 }
+
+func TestArticleDetailHandler(t *testing.T) {
+	// テストケースを用意
+	var tests = []struct {
+		name       string
+		articleID  string
+		resultCode int
+	}{
+		{name: "number pathparm", articleID: "1", resultCode: http.StatusOK},
+		{name: "alphabet pathparm", articleID: "aaa", resultCode: http.StatusNotFound},
+	}
+	// テーブルドリブンに実行
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// httptest.NewRequest関数でリクエスト作成
+			url := fmt.Sprintf("http://localhost:8080/article/%s", tt.articleID)
+			req := httptest.NewRequest(http.MethodGet, url, nil)
+
+			// httptest.ResponseRecorder構造体を用意
+			res := httptest.NewRecorder()
+
+			// ハンドラメソッドの実行
+			aCon.ArticleDetailHandler(res, req)
+
+			if res.Code != tt.resultCode {
+				t.Errorf("unexpected StatusCode want %d but %d\n", tt.resultCode, res.Code)
+			}
+		})
+	}
+}
